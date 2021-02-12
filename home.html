@@ -1,0 +1,104 @@
+<!DOCTYPE HTML>
+
+<html>
+   <head>
+      
+      <script type = "text/javascript">
+         function toInt(hi, lo) {
+            var i = lo + hi*256;
+            if (i > 32767) i -= 65536;
+            return i;
+         }
+
+         var ws;
+
+         function WebSocketTest() {
+               
+            // Let us open a web socket
+            var server = "ws:" + document.querySelector('#host').value +
+                         ":" + document.querySelector('#port').value;
+            ws = new WebSocket(server);
+            ws.binaryType = 'arraybuffer';
+				
+            ws.onopen = function() {
+                  
+               // Web Socket is connected, send data using send()
+          //     ws.send("ABCDE");
+               document.querySelector('#connect').disabled = true;
+               document.querySelector('#host').disabled = true;
+               document.querySelector('#port').disabled = true;
+               document.querySelector('#send').disabled = false;
+               document.querySelector('#string').disabled = false;
+            };
+				
+            ws.onmessage = function (evt) { 
+               var data = new Uint8Array(evt.data);
+               var temp = toInt(data[6], data[7]);
+               temp = 36.53 + temp/340;
+               document.querySelector('#temp').value = temp;
+               document.querySelector('#ax').value = toInt(data[0], data[1]);
+               document.querySelector('#ay').value = toInt(data[2], data[3]);
+               document.querySelector('#az').value = toInt(data[4], data[4]);
+               document.querySelector('#gx').value = toInt(data[8], data[9]);
+               document.querySelector('#gy').value = toInt(data[10], data[11]);
+               document.querySelector('#gz').value = toInt(data[12], data[13]);
+//               alert("Message is received...");
+            };
+				
+            ws.onclose = function() { 
+                  
+               // websocket is closed.
+               document.querySelector('#connect').disabled = false;
+               document.querySelector('#host').disabled = false;
+               document.querySelector('#port').disabled = false;
+               document.querySelector('#send').disabled = true;
+               document.querySelector('#string').disabled = true;
+            };
+         }
+
+         function ws_send() {
+//            var str = document.querySelector)'#string').value;
+//            if (str === "") ws.close();
+//            else ws.send(str);
+            ws.send(document.querySelector('#string').value);
+         }
+
+      </script>
+		
+   </head>
+   
+   <body>
+      <p id="support">WebSocket NOT supported by your Browser</p>
+      <input id="host" disabled value="192.168.50.236" />
+      <input id="port" disabled value="3333" />
+      <br/>
+      <button id="connect" type="button" disabled onclick="WebSocketTest()">
+         Connect
+      </button>
+      <br/>
+      send anything to read from gyroscope; send NULL to disconnect<br/>
+      <button id="send" type="button" disabled onclick='ws_send()'>
+         Send Message
+      </button>
+      <input id="string" disabled />
+      <br/>
+      Message echoed from server: 
+      <input id="receive" disabled />
+      <br/> AX<input id="ax" disabled />
+      <br/> AY<input id="ay" disabled />
+      <br/> AZ<input id="az" disabled />
+      <br/> TEMP<input id="temp" size=10 disabled />
+      <br/> GX<input id="gx" disabled />
+      <br/> GY<input id="gy" disabled />
+      <br/> GZ<input id="gz" disabled />
+      <script type = "text/javascript">
+         if ("WebSocket" in window) {
+           document.querySelector('#support').innerHTML =
+             "WebSocket is supported by your Browser";
+           document.querySelector('#connect').disabled = false;
+           document.querySelector('#host').disabled = false;
+           document.querySelector('#port').disabled = false;
+         }
+      </script>
+   </body>
+</html>
